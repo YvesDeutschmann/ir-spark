@@ -1,0 +1,4 @@
+{
+  "name": "ir-spark",
+  "install": "./scripts/install.sh"
+}

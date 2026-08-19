@@ -1,0 +1,16 @@
+---
+description: Python toolchain conventions for this uv-managed project
+globs: pyproject.toml,uv.lock,.python-version,src/**/*.py,notebooks/**/*.py,scripts/**
+alwaysApply: false
+---
+
+# Python / uv
+
+- Python is pinned in `.python-version`. Change it with `uv python pin`, not by editing files by hand unless necessary.
+- Add runtime deps with `uv add <package>`. Add dev tools with `uv add --dev <package>`.
+- Install with `uv sync --frozen` (see `scripts/install.sh`). Run tools with `uv run ...`.
+- Do not commit `.venv/`.
+- Lint with `uv run ruff check`.
+- Local dataset download: `uv run ir-spark-download`
+- Local Phase 1 smoke: `uv run ir-spark-smoke`
+- Databricks notebooks under `notebooks/` may use `%pip install splink` because that runtime is not this uv environment. Keep local Python on uv.

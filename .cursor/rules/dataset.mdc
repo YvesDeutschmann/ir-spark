@@ -1,0 +1,14 @@
+---
+description: How to handle the public company dataset without turning this into Phase 2
+globs: data/**,src/ir_spark/download.py
+alwaysApply: false
+---
+
+# Dataset handling
+
+- Download only via `uv run ir-spark-download` (Hugging Face snapshot `bigpictureio/companies-2023-q4-sm`, file `companies-2023-q4-sm.csv.gz`).
+- Expected sha256 is pinned in `src/ir_spark/download.py`. Do not "fix" a mismatch by skipping verification.
+- Observed header: `handle,name,website,industry,size,type,founded,city,state,country_code`. There is no separate `domain` column; website is the URL-like field. LinkedIn is `handle` (company pages, not people).
+- Leave the gzip in `data/raw/`. Sampling to 20–50k rows, Spark load, Delta write, and null/dupe profiling are **Phase 2** — do not do them unless asked.
+- Never print or commit full rows from the raw file in docs. Column names and aggregate counts are fine.
+- License: Open Data Commons Attribution (ODC-By). Attribute BigPicture / the snapshot publisher; do not paste their marketing copy into the README.

@@ -1,0 +1,16 @@
+---
+description: Databricks Free Edition and Splink Spark backend guidance for later phases
+alwaysApply: false
+---
+
+# Databricks and Splink
+
+When (and only when) implementing matching on Spark:
+
+- Verify the installed Splink version in the notebook. Current Splink 4 style is `from splink import Linker, SparkAPI` — not the older `SparkLinker` constructor. Re-check docs if the import fails.
+- Use the workspace's Spark session; do not invent cluster config or claim Unity Catalog / jobs expertise this project does not cover.
+- Write comparison and blocking settings from scratch for company `name`, `website`/`handle`, and `city`/`country_code`. No production rulesets.
+- Prefer Delta tables in the personal workspace for input/output once Phase 2 starts.
+- Keep this a scoped proof of concept: a sampled 20–50k slice is the intended iteration set, not 17M rows on day one.
+
+Named open gaps (do not paper over them): cluster tuning, Unity Catalog, job orchestration, cost management, incremental/streaming matching.

@@ -1,0 +1,25 @@
+---
+description: Current implementation scope — infrastructure only until explicitly asked to continue
+alwaysApply: true
+---
+
+# Scope
+
+The checked-in work is **project infrastructure only**:
+
+- Project brief and README
+- uv project (`pyproject.toml`, `uv.lock`)
+- Dataset download helper and local Spark/Splink smoke test
+- Cursor rules and Cloud Agent install script
+
+**Do not implement Phase 2 or later unless the user explicitly asks.** That includes:
+
+- Sampling the 17M-row file, Spark ingestion, Delta tables, data-quality profiling
+- Splink comparisons, blocking, EM/training, match predictions, clustering, golden entity IDs
+- Parent-child / ultimate-parent hierarchy rollup
+- Before/after reduction metrics and the interview one-pager beyond the current README
+- Databricks job orchestration, Unity Catalog, cluster tuning, or cost management
+
+Phase 1 Databricks signup and workspace creation are **human actions**. Local `uv run ir-spark-smoke` is the automated stand-in for "Spark + Splink import cleanly."
+
+If asked to implement a later phase, implement only that phase and keep comparison/blocking logic original to this repo.
