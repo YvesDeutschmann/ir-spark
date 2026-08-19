@@ -1,0 +1,17 @@
+---
+description: Hard constraints for this personal entity-resolution proof of concept
+alwaysApply: true
+---
+
+# Hard constraints
+
+This repo is a personal, interview-prep proof of concept. Do not violate these:
+
+- **No PII.** Use only public, company-level records. No person records, no employee/customer data, no data or code from any employer system.
+- **No employer artifacts.** Write Splink comparisons, blocking rules, schemas, and notebooks from scratch for this project. Do not port, paste, or paraphrase production rulesets, configs, or schemas from prior work.
+- **Personal environment only.** Databricks usage, if any, is a Free Edition workspace signed up with a personal email — not an employer domain, workspace, or billing account.
+- **Public dataset only.** Source is the People Data Labs / BigPicture free company snapshot mirrored on Kaggle (`mfrye0/bigpicture-company-dataset`) and Hugging Face (`bigpictureio/companies-2023-q4-sm`).
+- **Do not commit raw data.** `data/raw/` is gitignored. Never add CSV/gzip dumps, notebooks with dumped row output, or unmasked extracts.
+- **Manage Python with uv.** Do not add Poetry, pipenv, or ad-hoc `pip install` instructions as the project workflow.
+
+Canonical spec: `PROJECT_BRIEF.md`.

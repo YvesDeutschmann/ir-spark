@@ -216,3 +216,21 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Local dataset artifacts (do not commit)
+data/raw/*
+!data/raw/.gitkeep
+data/interim/*
+!data/interim/.gitkeep
+data/processed/*
+!data/processed/.gitkeep
+
+# Spark / Hive local scratch
+spark-warehouse/
+metastore_db/
+derby.log
+checkpoint/
+
+# Databricks local CLI / auth leftovers
+.databricks/
+.databricks-connect*
