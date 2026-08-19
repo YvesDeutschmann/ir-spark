@@ -11,22 +11,15 @@ import hashlib
 import sys
 from pathlib import Path
 
-HF_REPO_ID = "bigpictureio/companies-2023-q4-sm"
-HF_FILENAME = "companies-2023-q4-sm.csv.gz"
-EXPECTED_SHA256 = "c673f1c6936c8806f0284aac352c5a765d3ea429dc9bd26ee34b3118954e4466"
-EXPECTED_SIZE_BYTES = 629_293_547
+from ir_spark.constants import (
+    DEFAULT_RAW_PATH,
+    EXPECTED_SHA256,
+    EXPECTED_SIZE_BYTES,
+    HF_FILENAME,
+    HF_REPO_ID,
+)
 
-
-def find_repo_root() -> Path:
-    for start in (Path.cwd(), Path(__file__).resolve().parent):
-        for path in [start, *start.parents]:
-            if (path / "pyproject.toml").is_file() and (path / "src" / "ir_spark").is_dir():
-                return path
-    return Path.cwd()
-
-
-REPO_ROOT = find_repo_root()
-DEFAULT_OUTPUT = REPO_ROOT / "data" / "raw" / HF_FILENAME
+DEFAULT_OUTPUT = DEFAULT_RAW_PATH
 
 
 def sha256_file(path: Path) -> str:
@@ -101,7 +94,7 @@ def main(argv: list[str] | None = None) -> int:
 
     print(f"Verified {output_path}")
     print(f"sha256={EXPECTED_SHA256}")
-    print("Next: Phase 2 will sample and load this file into Spark/Delta.")
+    print("Next: `uv run ir-spark-sample` and upload the gzip to a Databricks Volume.")
     return 0
 
 

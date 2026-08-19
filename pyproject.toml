@@ -11,7 +11,10 @@ dependencies = [
 ]
 
 [project.scripts]
+ir-spark = "ir_spark.__main__:main"
 ir-spark-download = "ir_spark.download:main"
+ir-spark-sample = "ir_spark.sample:main"
+ir-spark-profile = "ir_spark.profile:main"
 ir-spark-smoke = "ir_spark.smoke:main"
 
 [build-system]

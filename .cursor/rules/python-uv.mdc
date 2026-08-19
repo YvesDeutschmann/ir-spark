@@ -12,5 +12,7 @@ alwaysApply: false
 - Do not commit `.venv/`.
 - Lint with `uv run ruff check`.
 - Local dataset download: `uv run ir-spark-download`
+- Local Phase 2 sample: `uv run ir-spark-sample`
+- Local Phase 2 DQ profile: `uv run ir-spark-profile`
 - Local Phase 1 smoke: `uv run ir-spark-smoke`
 - Databricks notebooks under `notebooks/` may use `%pip install splink` because that runtime is not this uv environment. Keep local Python on uv.
