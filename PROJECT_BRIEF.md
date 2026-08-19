@@ -2,7 +2,7 @@
 
 Personal, self-contained proof of concept. Interview evidence for a Forward Deployed Engineer conversation — not a portfolio flagship, not production software, not employer work.
 
-**Current status (this checkout):** infrastructure only. The brief below is the spec. Phases 2–6 are intentionally unimplemented.
+**Current status (this checkout):** Phases 1–2 are done locally and on Databricks Free Edition. Phase 2 Delta tables: `workspace.ir_spark.companies_raw` (17,154,017 rows) and `workspace.ir_spark.companies_sample` (30,000 rows). Phases 3–6 are not started.
 
 ## Objective
 
@@ -24,7 +24,7 @@ Purpose: hands-on Databricks/Spark practice, plus one clean before/after metric 
 - Kaggle: `kaggle.com/datasets/mfrye0/bigpicture-company-dataset`
 - Hugging Face mirror used for unauthenticated download: `bigpictureio/companies-2023-q4-sm` (`companies-2023-q4-sm.csv.gz`)
 - Company-level only — no individuals, no PII
-- Action (Phase 2, not this checkout): sample down to ~20–50K rows for iteration speed before scaling up if time allows
+- Sample down to ~20–50K rows for iteration speed before scaling up if time allows
 
 Observed columns in the gzip snapshot:
 
@@ -34,32 +34,51 @@ The brief's "domain" / "LinkedIn URL" / "locality" map onto `website`, `handle`,
 
 ## Environment
 
-- Databricks Free Edition (`free-edition.cloud.databricks.com` signup; no cloud account or credit card required)
-- PySpark on the provided serverless compute
-- `splink` Python package, Spark backend (`splink.SparkAPI` in current Splink 4 — verify against installed docs; the API has changed across versions)
-- Delta tables for input/output storage within the workspace
+- Databricks Free Edition (`free-edition.cloud.databricks.com` signup; no cloud account or credit card required). Personal workspace is live; CLI profile `yves.deutschmann` is authenticated.
+- PySpark on the provided serverless compute (Spark 4.1.0). No classic cluster was created.
+- `splink` 4.0.16 in the notebook environment; Spark backend is `from splink import SparkAPI`. Serverless is Spark Connect (no driver JVM), so Phase 1 init skips Splink’s JAR/`sparkContext` hook (`register_udfs_automatically=False`).
+- Delta tables for input/output storage within the workspace (Phase 2: `workspace.ir_spark.companies_raw` and `companies_sample`)
 
-Local development (this repo) uses **uv** for Python deps and a local Spark smoke test. That does not replace the Databricks workspace.
+Local development (this repo) uses **uv** for Python deps and a local Spark smoke test. That complements the workspace; it does not load company data into Delta.
 
 ## Build phases
 
-### Phase 1 — Environment setup
+### Phase 1 — Environment setup (done)
 
-- [ ] Sign up for Databricks Free Edition with personal email
-- [ ] Create workspace, confirm a Spark session runs (`spark.range(10).show()` or equivalent smoke test)
-- [ ] Install `splink` in the notebook environment, confirm import and Spark backend initialize without error
-- **Acceptance:** a notebook cell runs Spark + Splink imports cleanly with no manual cluster config beyond defaults
+- [x] Sign up for Databricks Free Edition with personal email
+- [x] Create workspace, confirm a Spark session runs (`spark.range(10).show()` or equivalent smoke test)
+- [x] Install `splink` in the notebook environment, confirm import and Spark backend initialize without error
+- **Acceptance (met):** a notebook cell on Free Edition default serverless runs Spark + Splink imports with no manual cluster config. Proven output: `spark=4.1.0 range10=10 splink=4.0.16 SparkAPI=SparkAPI` on `/Users/yves.deutschmann@gmail.com/ir-spark/01_environment_smoke`
 
-Local stand-in in this repo: `uv run ir-spark-smoke`.
+Local check in this repo (does not load company data):
 
-### Phase 2 — Data ingestion (not started)
+- [x] `uv run ir-spark-smoke` — `spark.range(10)` plus Splink `SparkAPI` initialize without error
+- [x] `notebooks/01_environment_smoke.py` — source for the workspace notebook; imported and executed on Free Edition serverless
 
-- [ ] Download the Kaggle dataset, upload to Databricks (DBFS or workspace volume)
-- [ ] Load into a Spark DataFrame, write to a Delta table
-- [ ] Profile the data: row count, null rates on name/domain/address fields, obvious duplicate patterns (same domain, near-identical names)
-- **Acceptance:** a Delta table exists with a documented row count and a short data-quality summary (nulls, dupes) captured in the notebook
+### Phase 2 — Data ingestion (done)
 
-Local raw file only (no Spark/Delta): `uv run ir-spark-download` → `data/raw/companies-2023-q4-sm.csv.gz`.
+- [x] Local download helper: `uv run ir-spark-download` → `data/raw/companies-2023-q4-sm.csv.gz`
+- [x] Local sample + aggregate DQ report: `uv run ir-spark-sample`, `uv run ir-spark-profile`
+- [x] Databricks notebook source: `notebooks/02_data_ingestion.py`
+- [x] Upload the full gzip to UC Volume `/Volumes/workspace/default/ir_spark/` (not workspace files — 500 MB cap; not DBFS root — disabled on Free Edition)
+- [x] Run the notebook on Free Edition serverless: gzip → Delta `workspace.ir_spark.companies_raw` (17,154,017 rows) + `workspace.ir_spark.companies_sample` (30,000 rows)
+- **Acceptance (met):** notebook exit `ok catalog=workspace full_count=17154017 sample_count=30000 raw_table=workspace.ir_spark.companies_raw sample_table=workspace.ir_spark.companies_sample` on `/Users/yves.deutschmann@gmail.com/ir-spark/02_data_ingestion`
+
+Local commands (no Spark/Delta):
+
+```bash
+uv run ir-spark-download
+uv run ir-spark-sample      # default n=30000 seed=42 → data/interim/
+uv run ir-spark-profile     # aggregate JSON → data/processed/dq_summary.json
+```
+
+Volume path used:
+
+```bash
+databricks fs cp data/raw/companies-2023-q4-sm.csv.gz \
+  dbfs:/Volumes/workspace/default/ir_spark/companies-2023-q4-sm.csv.gz \
+  --profile yves.deutschmann
+```
 
 ### Phase 3 — Entity matching (Splink on Spark) (not started)
 

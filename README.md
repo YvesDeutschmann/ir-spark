@@ -10,7 +10,7 @@ Company-level public data only. No people, no PII, no employer extracts, no port
 
 It is **not** a claim of Databricks seniority. Cluster tuning, Unity Catalog, job orchestration, and cost management stay named as gaps. It is also not a flagship public portfolio piece.
 
-**This checkout stops at infrastructure.** Phases 2–6 (Spark/Delta ingestion, Splink matching, hierarchy, the interview metric) are specified in the brief and not implemented yet.
+**Phase 2 ingestion is done** (local sample/profile + Databricks Delta tables). Splink matching, hierarchy rollup, and the interview metric are Phases 3–6.
 
 ## Approach (planned)
 
@@ -27,9 +27,11 @@ Target interview language: golden reference matching, disposition logic (match /
 | Path | Role |
 | --- | --- |
 | `PROJECT_BRIEF.md` | Full phase spec and constraints |
-| `src/ir_spark/` | Local helpers: dataset download + Spark/Splink smoke |
+| `src/ir_spark/` | Local helpers: download, sample, profile, Spark/Splink smoke |
 | `data/raw/` | Gitignored gzip snapshot (see `data/README.md`) |
-| `notebooks/` | Databricks notebooks (Phase 1+; matching notebooks not started) |
+| `data/interim/` | Gitignored local sample CSV + metadata |
+| `data/processed/` | Gitignored aggregate DQ JSON |
+| `notebooks/` | Databricks notebooks (Phase 1 smoke + Phase 2 ingestion) |
 | `.cursor/rules/` | Project rules for later agents |
 | `.cursor/environment.json` | Cloud Agent install (`uv sync`) |
 
@@ -54,21 +56,49 @@ uv run ruff check
 
 Do not use Poetry or a loose global `pip install` as the project workflow.
 
-## Dataset
+## Dataset and Phase 2 (local)
 
 Public 17M+ company snapshot (Kaggle `mfrye0/bigpicture-company-dataset`; Hugging Face gzip used here so no Kaggle token is required):
 
 ```bash
-uv run ir-spark-download
+uv run ir-spark-download      # → data/raw/companies-2023-q4-sm.csv.gz (~601 MiB, pinned sha256)
+uv run ir-spark-sample        # → data/interim/companies_sample.csv (default n=30000, seed=42)
+uv run ir-spark-profile       # → data/processed/dq_summary.json (aggregates only)
 ```
 
-That writes `data/raw/companies-2023-q4-sm.csv.gz` (~601 MiB) and verifies a pinned sha256. The file is **not** committed. Sampling, profiling, and Delta load are Phase 2.
+The gzip and derived CSVs are **not** committed. Profiling never prints full company rows.
 
-## Databricks (Phase 1, manual)
+Masked local 30k-sample DQ (`uv run ir-spark-profile`, seed 42): name null 0.03%; website 20.1%; handle 0%; city 20.8%; state 28.8%; country_code 18.1%. Exact duplicate rows: 0. Same-host collision groups (≥2): 94. Normalized-name collision groups (≥2): 7.
 
-1. Sign up at [Databricks Free Edition](https://www.databricks.com/learn/free-edition) with a **personal** email.
-2. In a serverless notebook, run `spark.range(10).show()`, then `%pip install splink` and `from splink import SparkAPI`.
-3. A starter notebook lives at `notebooks/01_environment_smoke.py` (imports only — no company data).
+## Databricks
+
+Personal Free Edition workspace, default serverless compute (no cluster config). CLI profile: `yves.deutschmann`.
+
+| Notebook source | Workspace path (after import) | Purpose |
+| --- | --- | --- |
+| `notebooks/01_environment_smoke.py` | `.../01_environment_smoke` | Phase 1: Spark + Splink import |
+| `notebooks/02_data_ingestion.py` | `.../02_data_ingestion` | Phase 2: gzip → Delta + DQ summary |
+
+### Upload the full gzip to a UC Volume
+
+Do **not** use workspace files (500 MB per-file cap; the gzip is ~600 MB) or DBFS root (disabled on Free Edition). This workspace uses catalog `workspace`. Volume already created and uploaded:
+
+`/Volumes/workspace/default/ir_spark/companies-2023-q4-sm.csv.gz`
+
+```bash
+databricks fs cp data/raw/companies-2023-q4-sm.csv.gz \
+  dbfs:/Volumes/workspace/default/ir_spark/companies-2023-q4-sm.csv.gz \
+  --profile yves.deutschmann
+```
+
+`02_data_ingestion.py` is imported at `/Users/yves.deutschmann@gmail.com/ir-spark/02_data_ingestion` and has been run on serverless. Proven tables:
+
+- `workspace.ir_spark.companies_raw` — 17,154,017 rows
+- `workspace.ir_spark.companies_sample` — 30,000 rows (Phase 3 input)
+
+If a full Delta write hits Free Edition fair-usage limits, the notebook still writes `companies_sample` and records the full row `count()` when that scan completes.
+
+Serverless is Spark Connect, so the Phase 1 notebook skips Splink’s JAR/`sparkContext` hook. Fuzzy JAR comparisons stay a Phase 3 concern.
 
 ## What would change at ZoomInfo-like scale (preview)
 

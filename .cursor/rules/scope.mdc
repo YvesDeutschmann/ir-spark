@@ -1,25 +1,25 @@
 ---
-description: Current implementation scope — infrastructure only until explicitly asked to continue
+description: Current implementation scope — Phase 2 ingestion done; matching not started
 alwaysApply: true
 ---
 
 # Scope
 
-The checked-in work is **project infrastructure only**:
+The checked-in work includes **Phase 1 and Phase 2 ingestion tooling**:
 
 - Project brief and README
 - uv project (`pyproject.toml`, `uv.lock`)
-- Dataset download helper and local Spark/Splink smoke test
+- Dataset download, reservoir sample, aggregate DQ profile, and local Spark/Splink smoke test
+- Databricks notebooks: `01_environment_smoke.py`, `02_data_ingestion.py`
 - Cursor rules and Cloud Agent install script
 
-**Do not implement Phase 2 or later unless the user explicitly asks.** That includes:
+**Do not implement Phase 3 or later unless the user explicitly asks.** That includes:
 
-- Sampling the 17M-row file, Spark ingestion, Delta tables, data-quality profiling
 - Splink comparisons, blocking, EM/training, match predictions, clustering, golden entity IDs
 - Parent-child / ultimate-parent hierarchy rollup
 - Before/after reduction metrics and the interview one-pager beyond the current README
 - Databricks job orchestration, Unity Catalog, cluster tuning, or cost management
 
-Phase 1 Databricks signup and workspace creation are **human actions**. Local `uv run ir-spark-smoke` is the automated stand-in for "Spark + Splink import cleanly."
+Phase 2 Databricks execution (Volume upload + notebook run) is done on this personal Free Edition workspace: gzip at `/Volumes/workspace/default/ir_spark/`, tables `workspace.ir_spark.companies_raw` and `companies_sample`.
 
 If asked to implement a later phase, implement only that phase and keep comparison/blocking logic original to this repo.
