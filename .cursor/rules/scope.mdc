@@ -1,25 +1,24 @@
 ---
-description: Current implementation scope — Phase 2 ingestion done; matching not started
+description: Current implementation scope — Phases 1–4 complete; interview metric not started
 alwaysApply: true
 ---
 
 # Scope
 
-The checked-in work includes **Phase 1 and Phase 2 ingestion tooling**:
+The checked-in work includes **Phases 1–4** (Databricks runs complete through hierarchy rollup):
 
 - Project brief and README
 - uv project (`pyproject.toml`, `uv.lock`)
 - Dataset download, reservoir sample, aggregate DQ profile, and local Spark/Splink smoke test
-- Databricks notebooks: `01_environment_smoke.py`, `02_data_ingestion.py`
+- Splink matching settings (`src/ir_spark/matching.py`) and notebooks `02b_match_sample.py`, `03_entity_matching.py`, `04_hierarchy_rollup.py`
+- Databricks notebooks: `01_environment_smoke.py`, `02_data_ingestion.py`, `02b_match_sample.py`, `03_entity_matching.py`, `04_hierarchy_rollup.py`
 - Cursor rules and Cloud Agent install script
 
-**Do not implement Phase 3 or later unless the user explicitly asks.** That includes:
+**Do not implement Phase 5 or later unless the user explicitly asks.** That includes:
 
-- Splink comparisons, blocking, EM/training, match predictions, clustering, golden entity IDs
-- Parent-child / ultimate-parent hierarchy rollup
 - Before/after reduction metrics and the interview one-pager beyond the current README
 - Databricks job orchestration, Unity Catalog, cluster tuning, or cost management
 
-Phase 2 Databricks execution (Volume upload + notebook run) is done on this personal Free Edition workspace: gzip at `/Volumes/workspace/default/ir_spark/`, tables `workspace.ir_spark.companies_raw` and `companies_sample`.
+Phase 2: gzip at `/Volumes/workspace/default/ir_spark/`, tables `workspace.ir_spark.companies_raw` and `companies_sample`. Phase 3 close-out: `companies_match_sample` (40,100) and `companies_golden` (40,100 rows, 33,697 goldens at threshold 0.9). Random `companies_sample` matching was all singletons (max p ≈ 0.20) and is the sparsity baseline — unique handles, not a matcher bug. Phase 4: `companies_hierarchy` (27,156 ultimate parents). The 40,100 → 33,697 → 27,156 funnel is **eval-set only** (collision-enriched). Do not present it as a 17M or random-sample reduction. Canonical findings: `PROJECT_BRIEF.md` § Evaluation findings.
 
-If asked to implement a later phase, implement only that phase and keep comparison/blocking logic original to this repo.
+If asked to implement a later phase, implement only that phase and keep comparison/blocking logic original to this repo. Phase 5 must use the four talking points in that findings section.

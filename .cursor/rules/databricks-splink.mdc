@@ -1,16 +1,18 @@
 ---
-description: Databricks Free Edition and Splink Spark backend guidance for later phases
+description: Databricks Free Edition and Splink Spark backend guidance for matching
 alwaysApply: false
 ---
 
 # Databricks and Splink
 
-When (and only when) implementing matching on Spark:
+When implementing or editing matching on Spark:
 
-- Verify the installed Splink version in the notebook. Current Splink 4 style is `from splink import Linker, SparkAPI` — not the older `SparkLinker` constructor. Re-check docs if the import fails.
+- Verify the installed Splink version in the notebook. Current Splink 4 style is `from splink import Linker, SparkAPI` — not the older `SparkLinker` constructor. Pin `splink==4.0.16` in notebooks.
 - Use the workspace's Spark session; do not invent cluster config or claim Unity Catalog / jobs expertise this project does not cover.
-- Write comparison and blocking settings from scratch for company `name`, `website`/`handle`, and `city`/`country_code`. No production rulesets.
-- Prefer Delta tables in the personal workspace for input/output once Phase 2 starts.
-- Keep this a scoped proof of concept: a sampled 20–50k slice is the intended iteration set, not 17M rows on day one.
+- **Free Edition serverless has no driver JVM.** Initialize `SparkAPI(..., register_udfs_automatically=False, break_lineage_method="delta_lake_table")`. Do **not** call `DataFrame.persist()` (serverless raises `PERSIST TABLE is not supported`). Do **not** use JAR-backed comparators (`NameComparison`, `JaroWinklerAtThresholds`, `EmailComparison`, `DamerauLevenshteinAtThresholds`). Use native Spark SQL `levenshtein()` via `CustomComparison` / `LevenshteinAtThresholds` with length gates. Canonical settings: `src/ir_spark/matching.py`.
+- Write comparison and blocking settings from scratch for company `name`, `website`/`host`, and `city`/`country_code`. No production rulesets.
+- Blocking: non-denylisted `host` OR `name_first3` + `country_norm` only. Never `block_on("name_first3")` alone. Abort if blocking pair count > 2M. Generic-host denylist is in `matching.py`.
+- Prefer Delta tables in the personal workspace for input/output. Phase 3 matching eval input: `companies_match_sample` (duplicate-enriched, ≤50k). Random `companies_sample` is the sparsity baseline. Output: `companies_golden` only — do not write pairwise prediction tables. Log lambda, per-rule pair counts, and a match-probability histogram in the notebook exit.
+- Keep this a scoped proof of concept: matching runs on `companies_match_sample` (≤50k), not 17M rows. Random `companies_sample` is the sparsity baseline only (all singletons; unique handles). The 40,100 → 33,697 → 27,156 funnel is eval-set only — do not describe it as a 17M or random-sample reduction. See `PROJECT_BRIEF.md` Evaluation findings.
 
 Named open gaps (do not paper over them): cluster tuning, Unity Catalog, job orchestration, cost management, incremental/streaming matching.
