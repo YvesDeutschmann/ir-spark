@@ -1,24 +1,27 @@
 ---
-description: Current implementation scope — Phases 1–4 complete; interview metric not started
+description: Current implementation scope — Phases 1–6 crib complete; verbal rehearsal on the author
 alwaysApply: true
 ---
 
 # Scope
 
-The checked-in work includes **Phases 1–4** (Databricks runs complete through hierarchy rollup):
+The checked-in work includes **Phases 1–6** (Databricks runs complete through eval metric verification, interview README, and Phase 6 rehearsal crib):
 
-- Project brief and README
+- Project brief and README (one-pager)
 - uv project (`pyproject.toml`, `uv.lock`)
 - Dataset download, reservoir sample, aggregate DQ profile, and local Spark/Splink smoke test
-- Splink matching settings (`src/ir_spark/matching.py`) and notebooks `02b_match_sample.py`, `03_entity_matching.py`, `04_hierarchy_rollup.py`
-- Databricks notebooks: `01_environment_smoke.py`, `02_data_ingestion.py`, `02b_match_sample.py`, `03_entity_matching.py`, `04_hierarchy_rollup.py`
+- Splink matching settings (`src/ir_spark/matching.py`) and notebooks `02b_match_sample.py`, `03_entity_matching.py`, `04_hierarchy_rollup.py`, `05_eval_metrics.py`
+- Databricks notebooks: `01_environment_smoke.py`, `02_data_ingestion.py`, `02b_match_sample.py`, `03_entity_matching.py`, `04_hierarchy_rollup.py`, `05_eval_metrics.py`
+- Phase 6 interview crib: `docs/interview.md` (JD term map + written 2-minute script; verbal rehearsal is on the author)
 - Cursor rules and Cloud Agent install script
 
-**Do not implement Phase 5 or later unless the user explicitly asks.** That includes:
+**Do not add more interview polish unless explicitly asked.** That includes rewriting the crib, linking it from README, or expanding into JD capability areas (TAM, fit scoring, contact matching, customer warehouse deploy).
 
-- Before/after reduction metrics and the interview one-pager beyond the current README
+**Do not implement beyond this scope unless explicitly asked:**
+
 - Databricks job orchestration, Unity Catalog, cluster tuning, or cost management
+- JD capability areas not practiced in this PoC (legal-entity crosswalks, domain validation, TAM/white space, fit scoring, contact matching)
 
-Phase 2: gzip at `/Volumes/workspace/default/ir_spark/`, tables `workspace.ir_spark.companies_raw` and `companies_sample`. Phase 3 close-out: `companies_match_sample` (40,100) and `companies_golden` (40,100 rows, 33,697 goldens at threshold 0.9). Random `companies_sample` matching was all singletons (max p ≈ 0.20) and is the sparsity baseline — unique handles, not a matcher bug. Phase 4: `companies_hierarchy` (27,156 ultimate parents). The 40,100 → 33,697 → 27,156 funnel is **eval-set only** (collision-enriched). Do not present it as a 17M or random-sample reduction. Canonical findings: `PROJECT_BRIEF.md` § Evaluation findings.
+Phase 2: gzip at `/Volumes/workspace/default/ir_spark/`, tables `workspace.ir_spark.companies_raw` and `companies_sample`. Phase 3 close-out: `companies_match_sample` (40,100) and `companies_golden` (40,100 rows, 33,697 goldens at threshold 0.9). Random `companies_sample` matching was all singletons (max p ≈ 0.20) and is the sparsity baseline — unique handles, not a matcher bug. Phase 4: `companies_hierarchy` (27,156 ultimate parents). Phase 5: frozen funnel in README; `05_eval_metrics.py` verifies Delta matches 40,100 → 33,697 → 27,156. That funnel is **eval-set only** (collision-enriched). Do not present it as a 17M or random-sample reduction. Canonical findings: `PROJECT_BRIEF.md` § Evaluation findings.
 
-If asked to implement a later phase, implement only that phase and keep comparison/blocking logic original to this repo. Phase 5 must use the four talking points in that findings section.
+Do not rematch 17M or change matching/hierarchy logic to chase a larger reduction.

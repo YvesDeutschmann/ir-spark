@@ -9,10 +9,21 @@ Databricks notebooks for this proof of concept.
 | `02b_match_sample.py` | 3 close-out | Imported to `/Users/yves.deutschmann@gmail.com/ir-spark/02b_match_sample` and run on serverless. Writes `workspace.ir_spark.companies_match_sample` (40,100; host and name+country groups size 2–10 plus filler). |
 | `03_entity_matching.py` | 3 | Imported to `/Users/yves.deutschmann@gmail.com/ir-spark/03_entity_matching` and run on Free Edition serverless. Eval input is `companies_match_sample`. Writes `workspace.ir_spark.companies_golden` (40,100 rows, 33,697 goldens). Native Spark SQL Levenshtein (no JAR Jaro-Winkler); lineage via `delta_lake_table`. |
 | `04_hierarchy_rollup.py` | 4 | Imported to `/Users/yves.deutschmann@gmail.com/ir-spark/04_hierarchy_rollup` and run on serverless. Writes `workspace.ir_spark.companies_hierarchy` (27,156 ultimate parents). |
+| `05_eval_metrics.py` | 5 | Imported to `/Users/yves.deutschmann@gmail.com/ir-spark/05_eval_metrics` and run on serverless (03/04 idle). Read-only verifier; asserts frozen funnel against Delta; no writes. |
 
 Re-import from these files after local edits. Serverless compute is the default; do not add cluster-tuning notes as if they were practiced here.
 
+Phase 6 is interview prep only — rehearsal crib in [`docs/interview.md`](../docs/interview.md) (no notebook).
+
 Phase 3 blocks on non-denylisted host or `name_first3` + `country_norm`, aborts if blocking pair count exceeds 2M, and never uses `block_on("name_first3")` alone. Do not add Jaro-Winkler / `NameComparison` on this workspace.
+
+## Phase 5 eval metric (done)
+
+- Inputs: `workspace.ir_spark.companies_match_sample`, `companies_golden`, `companies_hierarchy` (widgets; suffix allowlist only)
+- Read-only: counts, `record_id` set checks, Delta version pin; hard-fails if live funnel ≠ frozen PROJECT_BRIEF findings
+- Prints documented sparsity baseline and disposition constants (not recomputed — pairwise scores were never persisted)
+- Notebook exit: `ok record_n=40100 golden_n=33697 parent_n=27156 reduction_records_to_golden=0.1597 reduction_golden_to_parent=0.1941 reduction_records_to_parent=0.3228 match_sample_version=0 golden_version=3 hierarchy_version=0 match_sample_table=workspace.ir_spark.companies_match_sample golden_table=workspace.ir_spark.companies_golden hierarchy_table=workspace.ir_spark.companies_hierarchy`
+- Interview one-pager: [`README.md`](../README.md)
 
 ## Phase 4 hierarchy (done)
 

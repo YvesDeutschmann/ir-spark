@@ -2,7 +2,7 @@
 
 Personal, self-contained proof of concept. Interview evidence for a Forward Deployed Engineer conversation — not a portfolio flagship, not production software, not employer work.
 
-**Current status (this checkout):** Phases 1–4 are done locally and on Databricks Free Edition. Phase 2: `workspace.ir_spark.companies_raw` (17,154,017) and random `companies_sample` (30,000). Phase 3 close-out wrote duplicate-enriched `companies_match_sample` (40,100) and `companies_golden` (40,100 `record_id` → 33,697 `golden_entity_id`). Phase 4 wrote `companies_hierarchy` (27,156 ultimate parents). Evaluation findings are recorded below — Phase 5–6 must use that framing. Phases 5–6 are not started.
+**Current status (this checkout):** Phases 1–5 are done locally and on Databricks Free Edition. Phase 2: `workspace.ir_spark.companies_raw` (17,154,017) and random `companies_sample` (30,000). Phase 3 close-out wrote duplicate-enriched `companies_match_sample` (40,100) and `companies_golden` (40,100 `record_id` → 33,697 `golden_entity_id`). Phase 4 wrote `companies_hierarchy` (27,156 ultimate parents). Phase 5: interview one-pager in [`README.md`](README.md) and read-only verifier [`notebooks/05_eval_metrics.py`](notebooks/05_eval_metrics.py). Phase 6 crib: [`docs/interview.md`](docs/interview.md) (JD term map + written 2-minute script). Verbal rehearsal is on the author. Evaluation findings below are canonical.
 
 ## Objective
 
@@ -159,17 +159,19 @@ Matching calibration (enriched run): `training=em`, λ = 1.86×10⁻⁵, `pair_n
 
 ## Build phases (continued)
 
-### Phase 5 — Quantify and document (not started)
+### Phase 5 — Quantify and document (done)
 
-- [ ] Compute one clear metric: raw records → golden entities → ultimate-parent count (with % reduction at each stage) — **on `companies_match_sample`, with the random 30k as the sparsity baseline**, per Evaluation findings
-- [ ] Write a one-page README: problem statement, approach, the metric, 2–3 sentences on what would change running this at ZoomInfo's actual scale (500M+ profiles) — e.g. incremental/streaming matching vs. batch, blocking strategy at scale, cluster sizing. Use the four bullets above; do not present the enriched funnel as a random-sample result.
-- **Acceptance:** README is readable standalone, in your own words, no dataset-provider boilerplate copied in; evaluation framing matches this section
+- [x] Compute one clear metric: raw records → golden entities → ultimate-parent count (with % reduction at each stage) — **on `companies_match_sample`, with the random 30k as the sparsity baseline**, per Evaluation findings. Read-only verifier: `notebooks/05_eval_metrics.py` (hard-fails if Delta drifts from frozen findings).
+- [x] Write a one-page README: problem statement, approach, the metric, 2–3 sentences on what would change running this at ZoomInfo's actual scale (500M+ profiles) — e.g. incremental/streaming matching vs. batch, blocking strategy at scale, cluster sizing. Uses the four bullets above; does not present the enriched funnel as a random-sample result.
+- **Acceptance (met):** [`README.md`](README.md) is readable standalone, in your own words, no dataset-provider boilerplate copied in; evaluation framing matches this section. Verifier exit on `/Users/yves.deutschmann@gmail.com/ir-spark/05_eval_metrics`: `ok record_n=40100 golden_n=33697 parent_n=27156 reduction_records_to_golden=0.1597 reduction_golden_to_parent=0.1941 reduction_records_to_parent=0.3228 match_sample_version=0 golden_version=3 hierarchy_version=0`
 
-### Phase 6 — Interview prep pass (not started)
+### Phase 6 — Interview prep pass (crib done)
 
-- [ ] Re-read the JD's specific language ("golden reference matching," "disposition logic," "ultimate-parent rollup," "hierarchy management") and confirm README/talking points use matching terminology
-- [ ] Prepare one tight spoken answer: what's the same as prior Splink/OFM experience, what's different about Spark/Databricks specifically, what you'd want to learn next
-- **Acceptance:** you can explain the project end-to-end out loud in under 2 minutes without notes
+Stripped posting: [`docs/zoominfo-senior-fde.md`](docs/zoominfo-senior-fde.md). Rehearsal crib: [`docs/interview.md`](docs/interview.md).
+
+- [x] Re-read the JD's specific language ("golden reference matching," "disposition logic," "ultimate-parent rollup," "hierarchy management") and confirm README/talking points use matching terminology
+- [x] Prepare one tight spoken answer: what's the same as prior Splink/OFM experience, what's different about Spark/Databricks specifically, what you'd want to learn next
+- **Acceptance (human gate — not met by the crib alone):** you can explain the project end-to-end out loud in under 2 minutes without notes
 
 ## Explicit non-goals
 
@@ -180,6 +182,6 @@ Matching calibration (enriched run): `training=em`, λ = 1.86×10⁻⁵, `pair_n
 ## Deliverable checklist
 
 - [x] One or more Databricks notebooks covering ingestion → matching → rollup
-- [ ] One before/after metric, clearly stated
-- [ ] One README (markdown, in the workspace or exported)
+- [x] One before/after metric, clearly stated (eval set only; see README and `05_eval_metrics.py`)
+- [x] One README (markdown, in the workspace or exported)
 - [ ] One rehearsed 2-minute verbal summary
