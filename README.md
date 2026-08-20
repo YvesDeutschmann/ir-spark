@@ -10,7 +10,7 @@ Company-level public data only. No people, no PII, no employer extracts, no port
 
 It is **not** a claim of Databricks seniority. Cluster tuning, Unity Catalog, job orchestration, and cost management stay named as gaps. It is also not a flagship public portfolio piece.
 
-**Phase 2 ingestion is done** (local sample/profile + Databricks Delta tables). Splink matching, hierarchy rollup, and the interview metric are Phases 3–6.
+**Phase 2 ingestion is done** (local sample/profile + Databricks Delta tables). Splink matching, hierarchy rollup, and the interview metric are Phases 3–6. Phase 3 is planned in [`PHASE3_PLAN.md`](PHASE3_PLAN.md) (not implemented).
 
 ## Approach (planned)
 

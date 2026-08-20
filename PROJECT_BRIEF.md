@@ -82,7 +82,9 @@ databricks fs cp data/raw/companies-2023-q4-sm.csv.gz \
 
 ### Phase 3 — Entity matching (Splink on Spark) (not started)
 
-- [ ] Define comparison logic from scratch: fuzzy company name (e.g. Jaro-Winkler or Levenshtein), exact/fuzzy domain match, locality/country match
+Implementation plan (no code yet): [`PHASE3_PLAN.md`](PHASE3_PLAN.md). Native Spark SQL Levenshtein for names (JAR-free on Free Edition serverless); exact host after Phase 2 normalization; exact city/country.
+
+- [ ] Define comparison logic from scratch: fuzzy company name (Levenshtein, not Jaro-Winkler), exact domain match, locality/country match
 - [ ] Define blocking rules to keep the comparison space tractable (e.g. block on first token of domain, or country + first letter of name)
 - [ ] Train/estimate the Splink model (u-probabilities via random sampling, m-probabilities via EM if time allows, otherwise reasonable manual priors)
 - [ ] Generate match predictions and cluster into golden entity IDs
